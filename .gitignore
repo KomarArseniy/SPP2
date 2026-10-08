@@ -1,0 +1,38 @@
+# --- IDE / редакторы ---
+.idea/
+*.iml
+*.iws
+.vscode/
+*.swp
+*~
+
+# --- Зависимости и сборка ---
+node_modules/
+dist/
+build/
+.vite/
+.cache/
+
+# --- Переменные окружения и секреты ---
+.env
+.env.*
+!.env.example
+
+# --- Логи ---
+*.log
+npm-debug.log*
+
+# --- Загруженные пользователями файлы (оставляем только .gitkeep) ---
+**/uploads/*
+!**/uploads/.gitkeep
+
+# --- Данные приложения lab1 (JSON-«база») ---
+lab1/data/tasks.json
+
+# --- Документы ---
+*.pdf
+
+# --- Системные файлы ---
+.DS_Store
+Thumbs.db
+desktop.ini

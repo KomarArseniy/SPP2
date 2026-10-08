@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<%- include('partials/head', { title: 'Новая задача' }) %>
+<body>
+  <div class="container container--narrow">
+    <header class="page-header">
+      <h1>Новая задача</h1>
+      <a class="btn" href="/tasks">← К списку</a>
+    </header>
+
+    <% if (error) { %>
+      <p class="alert alert--error"><%= error %></p>
+    <% } %>
+
+    <form action="/tasks" method="POST" enctype="multipart/form-data" class="task-form">
+      <label class="field">
+        <span>Название задачи *</span>
+        <input type="text" name="title" value="<%= values.title || '' %>" required maxlength="200" />
+      </label>
+
+      <label class="field">
+        <span>Описание</span>
+        <textarea name="description" rows="4" maxlength="5000"><%= values.description || '' %></textarea>
+      </label>
+
+      <label class="field">
+        <span>Ожидаемая дата завершения</span>
+        <input type="date" name="dueDate" value="<%= values.dueDate || '' %>" />
+      </label>
+
+      <label class="field">
+        <span>Прикреплённые файлы</span>
+        <input type="file" name="attachments" multiple />
+      </label>
+
+      <div class="form-actions">
+        <button class="btn btn--primary" type="submit">Создать задачу</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-spp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-spp}
+      POSTGRES_DB: ${POSTGRES_DB:-spp}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-spp} -d ${POSTGRES_DB:-spp}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  server:
+    build: ./server
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-spp}:${POSTGRES_PASSWORD:-spp}@db:5432/${POSTGRES_DB:-spp}
+      UPLOADS_DIR: /app/uploads
+      PORT: 4000
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  client:
+    build: ./client
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"
+    depends_on:
+      - server
+
+volumes:
+  db-data:
+  uploads:

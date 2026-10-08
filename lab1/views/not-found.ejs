@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ru">
+<%- include('partials/head', { title: 'Не найдено' }) %>
+<body>
+  <div class="container container--narrow">
+    <h1>404</h1>
+    <p>
+      <% if (id) { %>
+        Задача с идентификатором <code><%= id %></code> не найдена.
+      <% } else { %>
+        Страница не найдена.
+      <% } %>
+    </p>
+    <a class="btn btn--primary" href="/tasks">← К списку задач</a>
+  </div>
+</body>
+</html>

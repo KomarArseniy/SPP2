@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<%- include('partials/head', { title: 'Список задач' }) %>
+<body>
+  <div class="container">
+    <header class="page-header">
+      <h1>Список задач</h1>
+      <a class="btn btn--primary" href="/tasks/new">+ Новая задача</a>
+    </header>
+
+    <% if (error) { %>
+      <p class="alert alert--error"><%= error %></p>
+    <% } %>
+
+    <nav class="filters">
+      <% const filters = [
+        ['all', 'Все'],
+        ['todo', STATUSES.todo],
+        ['in_progress', STATUSES.in_progress],
+        ['done', STATUSES.done],
+      ]; %>
+      <% filters.forEach(([value, label]) => { %>
+        <a
+          class="filter-link <%= currentStatus === value ? 'filter-link--active' : '' %>"
+          href="/tasks?status=<%= value %>"
+        ><%= label %></a>
+      <% }) %>
+    </nav>
+
+    <% if (tasks.length === 0) { %>
+      <p class="empty-state">Задач с таким статусом пока нет.</p>
+    <% } else { %>
+      <ul class="task-list">
+        <% tasks.forEach((task) => { %>
+          <% const overdue = task.dueDate && task.status !== 'done' && new Date(task.dueDate) < new Date(new Date().toDateString()); %>
+          <li class="task-card <%= overdue ? 'task-card--overdue' : '' %>">
+            <div class="task-card__main">
+              <a class="task-card__title" href="/tasks/<%= task.id %>"><%= task.title %></a>
+              <%- include('partials/status-badge', { task, STATUSES }) %>
+            </div>
+
+            <div class="task-card__meta">
+              <% if (task.dueDate) { %>
+                <span class="meta-item">
+                  Срок: <%= formatDate(task.dueDate) %>
+                  <% if (overdue) { %><strong class="overdue-label">просрочено</strong><% } %>
+                </span>
+              <% } %>
+              <% if (task.attachments.length) { %>
+                <span class="meta-item">📎 <%= task.attachments.length %></span>
+              <% } %>
+            </div>
+
+            <form class="status-form" action="/tasks/<%= task.id %>/status" method="POST">
+              <input type="hidden" name="redirectTo" value="list" />
+              <select name="status">
+                <% Object.entries(STATUSES).forEach(([value, label]) => { %>
+                  <option value="<%= value %>" <%= task.status === value ? 'selected' : '' %>><%= label %></option>
+                <% }) %>
+              </select>
+              <button class="btn btn--small" type="submit">Обновить</button>
+            </form>
+
+            <form class="delete-form" action="/tasks/<%= task.id %>/delete" method="POST">
+              <button class="btn btn--small btn--danger" type="submit">Удалить</button>
+            </form>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+</body>
+</html>

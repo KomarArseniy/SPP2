@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<%- include('partials/head', { title: task.title }) %>
+<body>
+  <div class="container container--narrow">
+    <header class="page-header">
+      <h1><%= task.title %></h1>
+      <a class="btn" href="/tasks">← К списку</a>
+    </header>
+
+    <% if (error) { %>
+      <p class="alert alert--error"><%= error %></p>
+    <% } %>
+
+    <div class="task-details">
+      <p><%- include('partials/status-badge', { task, STATUSES }) %></p>
+
+      <% if (task.description) { %>
+        <p class="task-details__description"><%= task.description %></p>
+      <% } %>
+
+      <p class="meta-item">
+        Ожидаемая дата завершения:
+        <strong><%= task.dueDate ? formatDate(task.dueDate) : 'не указана' %></strong>
+      </p>
+      <p class="meta-item">Создана: <%= formatDate(new Date(task.createdAt).toISOString()) %></p>
+    </div>
+
+    <section class="section">
+      <h2>Статус</h2>
+      <form class="status-form" action="/tasks/<%= task.id %>/status" method="POST">
+        <input type="hidden" name="redirectTo" value="show" />
+        <select name="status">
+          <% Object.entries(STATUSES).forEach(([value, label]) => { %>
+            <option value="<%= value %>" <%= task.status === value ? 'selected' : '' %>><%= label %></option>
+          <% }) %>
+        </select>
+        <button class="btn" type="submit">Обновить статус</button>
+      </form>
+    </section>
+
+    <section class="section">
+      <h2>Прикреплённые файлы</h2>
+
+      <% if (task.attachments.length === 0) { %>
+        <p class="empty-state">Файлов пока нет.</p>
+      <% } else { %>
+        <ul class="attachment-list">
+          <% task.attachments.forEach((a) => { %>
+            <li class="attachment-item">
+              <a href="/files/<%= a.filename %>"><%= a.originalName %></a>
+              <span class="attachment-size">(<%= Math.ceil(a.size / 1024) %> КБ)</span>
+              <form action="/tasks/<%= task.id %>/attachments/<%= a.id %>/delete" method="POST" class="attachment-delete-form">
+                <button class="btn btn--small btn--danger" type="submit">Удалить</button>
+              </form>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+
+      <form action="/tasks/<%= task.id %>/attachments" method="POST" enctype="multipart/form-data" class="attach-form">
+        <input type="file" name="attachments" multiple />
+        <button class="btn btn--small" type="submit">Прикрепить</button>
+      </form>
+    </section>
+
+    <section class="section">
+      <form action="/tasks/<%= task.id %>/delete" method="POST">
+        <button class="btn btn--danger" type="submit">Удалить задачу</button>
+      </form>
+    </section>
+  </div>
+</body>
+</html>
