@@ -111,7 +111,13 @@ export default function App() {
   return (
     <div className="container">
       <header className="page-header">
-        <h1>Список задач</h1>
+        <div className="brand">
+          <span className="brand-mark" aria-hidden="true">✓</span>
+          <div>
+            <h1>Список задач</h1>
+            <p className="subtitle">{loading && tasks.length === 0 ? 'Загрузка…' : `Показано задач: ${tasks.length}`}</p>
+          </div>
+        </div>
         {!creating && (
           <button className="btn btn--primary" onClick={() => setCreating(true)}>
             + Новая задача

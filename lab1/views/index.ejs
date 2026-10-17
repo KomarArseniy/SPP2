@@ -33,7 +33,7 @@
       <ul class="task-list">
         <% tasks.forEach((task) => { %>
           <% const overdue = task.dueDate && task.status !== 'done' && new Date(task.dueDate) < new Date(new Date().toDateString()); %>
-          <li class="task-card <%= overdue ? 'task-card--overdue' : '' %>">
+          <li class="task-card task-card--<%= task.status %> <%= overdue ? 'task-card--overdue' : '' %>">
             <div class="task-card__main">
               <a class="task-card__title" href="/tasks/<%= task.id %>"><%= task.title %></a>
               <%- include('partials/status-badge', { task, STATUSES }) %>
@@ -50,6 +50,14 @@
                 <span class="meta-item">📎 <%= task.attachments.length %></span>
               <% } %>
             </div>
+
+            <% if (task.attachments.length) { %>
+              <div class="task-card__files">
+                <% task.attachments.forEach((a) => { %>
+                  <a class="file-chip" href="/files/<%= a.filename %>" title="Скачать"><%= a.originalName %></a>
+                <% }) %>
+              </div>
+            <% } %>
 
             <form class="status-form" action="/tasks/<%= task.id %>/status" method="POST">
               <input type="hidden" name="redirectTo" value="list" />

@@ -52,7 +52,7 @@ export default function TaskItem({ task, onStatus, onUpdate, onDelete, onUpload,
   }
 
   return (
-    <li className={`task-card ${overdue ? 'task-card--overdue' : ''}`}>
+    <li className={`task-card task-card--${task.status} ${overdue ? 'task-card--overdue' : ''}`}>
       <div className="task-card__main">
         <span className="task-card__title">{task.title}</span>
         <span className={`badge badge--${task.status}`}>{STATUSES[task.status]}</span>
