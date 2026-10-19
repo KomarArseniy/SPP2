@@ -1,0 +1,74 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-spp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-spp}
+      POSTGRES_DB: ${POSTGRES_DB:-spp}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-spp} -d ${POSTGRES_DB:-spp}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  # «Почтовый ящик для разработки»: принимает письма по SMTP и показывает их в веб-интерфейсе.
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "${MAIL_UI_PORT:-8025}:8025"   # веб-интерфейс: http://localhost:8025
+
+  server:
+    build: ./server
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-spp}:${POSTGRES_PASSWORD:-spp}@db:5432/${POSTGRES_DB:-spp}
+      UPLOADS_DIR: /app/uploads
+      PORT: 4000
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      # --- временные ключи ---
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret-change-me-before-production}
+      ACCESS_TOKEN_TTL_SECONDS: ${ACCESS_TOKEN_TTL_SECONDS:-900}
+      REFRESH_TOKEN_TTL_SECONDS: ${REFRESH_TOKEN_TTL_SECONDS:-604800}
+      # --- защита от подбора и контроль подключений ---
+      MAX_FAILED_ATTEMPTS: ${MAX_FAILED_ATTEMPTS:-5}
+      LOCKOUT_MINUTES: ${LOCKOUT_MINUTES:-15}
+      MAX_SESSIONS: ${MAX_SESSIONS:-5}
+      # --- восстановление доступа ---
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      MAIL_FROM: "Список задач <no-reply@tasks.local>"
+      APP_URL: http://localhost:${APP_PORT:-8080}
+      # --- начальные пользователи (для проверки лабораторной) ---
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin12345!}
+      SEED_DEMO_USERS: ${SEED_DEMO_USERS:-true}
+    volumes:
+      - uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    depends_on:
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  client:
+    build: ./client
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"
+    depends_on:
+      server:
+        condition: service_healthy
+
+volumes:
+  db-data:
+  uploads:

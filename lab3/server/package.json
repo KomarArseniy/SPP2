@@ -1,0 +1,27 @@
+{
+  "name": "spp-lab3-server",
+  "version": "1.0.0",
+  "description": "REST API для лабораторной работы №3 (Express + PostgreSQL, роли, временные ключи, логирование)",
+  "private": true,
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test test/api.test.js",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.0.2",
+    "nodemailer": "^10.1.7",
+    "pg": "^8.13.1",
+    "pino": "^10.4.0",
+    "pino-http": "^11.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.13.0",
+    "globals": "^17.13.0"
+  }
+}

@@ -1,0 +1,88 @@
+# Автоматическая проверка кода ЛР3: линтер, тесты, сборка клиента и Docker-образов.
+# Запускается при каждом push и pull request, затрагивающем lab3/.
+name: Lab3 CI
+
+on:
+  push:
+    paths: ['lab3/**', '.github/workflows/lab3-ci.yml']
+  pull_request:
+    paths: ['lab3/**', '.github/workflows/lab3-ci.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: lab3-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  server:
+    name: Сервер — линтер и тесты
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lab3/server
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: spp
+          POSTGRES_PASSWORD: spp
+          POSTGRES_DB: spp
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U spp -d spp"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://spp:spp@localhost:5432/spp
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lab3/server/package-lock.json
+      - run: npm ci
+      - name: ESLint
+        run: npm run lint
+      - name: Тесты API (PostgreSQL в сервисном контейнере)
+        run: npm test
+      - name: Аудит зависимостей (не блокирует сборку)
+        run: npm audit --omit=dev --audit-level=high
+        continue-on-error: true
+
+  client:
+    name: Клиент — линтер и сборка
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lab3/client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lab3/client/package-lock.json
+      - run: npm ci
+      - name: ESLint
+        run: npm run lint
+      - name: Сборка
+        run: npm run build
+
+  docker:
+    name: Docker — сборка образов
+    runs-on: ubuntu-latest
+    needs: [server, client]
+    defaults:
+      run:
+        working-directory: lab3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Проверка docker-compose.yml
+        run: docker compose config -q
+      - name: Сборка образов
+        run: docker compose build
