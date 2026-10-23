@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TypeRush — гонка по тексту</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="top">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z" fill="url(#lg)"/><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#a78bfa"/></linearGradient></defs></svg>
+      <span>Type<b>Rush</b></span>
+    </div>
+    <div id="conn" class="conn conn--off"><i></i><span>подключение…</span></div>
+  </header>
+
+  <main class="layout">
+    <section class="col-main">
+      <!-- вход -->
+      <div id="join" class="card join">
+        <h1>Гонка по тексту</h1>
+        <p class="muted">Печатайте быстрее соперников. Все видят прогресс друг друга в реальном времени.</p>
+        <form id="joinForm" autocomplete="off">
+          <label for="nameInput">Ваше имя</label>
+          <div class="join__row">
+            <input id="nameInput" maxlength="16" placeholder="Например, Алекс" required>
+            <button class="btn btn--primary" type="submit">Играть</button>
+          </div>
+          <div id="joinError" class="error" role="alert"></div>
+        </form>
+      </div>
+
+      <!-- игра -->
+      <div id="game" hidden>
+        <div class="card">
+          <div class="card__head">
+            <h2>Трасса</h2>
+            <span id="phaseLabel" class="pill">Ожидание</span>
+          </div>
+          <div id="lanes" class="lanes"></div>
+        </div>
+
+        <div id="typingCard" class="card typing">
+          <div class="stats">
+            <div class="stat"><span class="stat__v" id="sWpm">0</span><span class="stat__l">слов/мин (WPM)</span></div>
+            <div class="stat"><span class="stat__v" id="sAcc">100%</span><span class="stat__l">точность</span></div>
+            <div class="stat"><span class="stat__v" id="sProg">0%</span><span class="stat__l">прогресс</span></div>
+            <div class="stat"><span class="stat__v" id="sTime">0:00</span><span class="stat__l">время</span></div>
+          </div>
+
+          <div id="textbox" class="textbox" tabindex="-1">
+            <div id="text" class="text" aria-live="off"></div>
+            <input id="typer" class="typer" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Поле ввода текста гонки" disabled>
+            <div id="overlay" class="overlay" hidden><div id="overlayBig" class="overlay__big"></div><div id="overlaySmall" class="overlay__small"></div></div>
+          </div>
+
+          <div class="typing__foot">
+            <p id="hint" class="muted"></p>
+            <button id="readyBtn" class="btn btn--primary" type="button">Готов</button>
+          </div>
+        </div>
+
+        <div id="results" class="card results" hidden>
+          <div class="card__head"><h2>Итоги гонки</h2><span id="nextIn" class="pill"></span></div>
+          <div id="resultsBanner" class="banner"></div>
+          <table class="table">
+            <thead><tr><th>Место</th><th>Игрок</th><th>WPM</th><th>Точность</th><th>Результат</th></tr></thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <aside class="col-side">
+      <div class="card">
+        <div class="card__head"><h2>Таблица лидеров</h2><span class="pill pill--ghost">лучший WPM</span></div>
+        <ol id="lb" class="lb"></ol>
+        <p id="lbEmpty" class="muted small">Пока пусто — станьте первым!</p>
+      </div>
+      <div class="card tips">
+        <h2>Как играть</h2>
+        <ol class="small muted">
+          <li>Нажмите «Готов». Гонка стартует, когда готовы все (или через 20 с после первого).</li>
+          <li>После отсчёта печатайте текст. Пробел — переход к следующему слову, Backspace стирает (даже в предыдущем слове). Ошибки снижают точность, но не останавливают машинку.</li>
+          <li>Побеждает тот, кто первым допечатает текст. Когда кто-то финишировал, остальным дают 25 секунд, чтобы закончить.</li>
+        </ol>
+      </div>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

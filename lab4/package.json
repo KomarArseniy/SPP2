@@ -1,0 +1,16 @@
+{
+  "name": "spp-lab4-typerush",
+  "version": "1.0.0",
+  "description": "ЛР4: TypeRush — многопользовательская гонка по тексту в реальном времени (WebSocket)",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
