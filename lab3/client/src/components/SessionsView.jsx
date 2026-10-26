@@ -57,7 +57,7 @@ export default function SessionsView() {
 
       <ul className="task-list">
         {sessions?.map((s) => (
-          <li key={s.id} className={`task-card ${s.current ? 'task-card--done' : ''}`}>
+          <li key={s.id} className={`task-card ${s.current ? 'task-card--current' : ''}`}>
             <div className="task-card__main">
               <span className="task-card__title">{describeAgent(s.userAgent)}</span>
               {s.current ? <span className="badge badge--done">Это устройство</span> : (

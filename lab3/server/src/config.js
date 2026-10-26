@@ -17,6 +17,7 @@ module.exports = {
   databaseUrl: env.DATABASE_URL || 'postgres://spp:spp@localhost:5432/spp',
   uploadsDir: env.UPLOADS_DIR || null,
   logLevel: env.LOG_LEVEL || 'info',
+  logFile: env.LOG_FILE || '', // например /app/logs/app.log; пусто — писать только в stdout
   trustProxy: int(env.TRUST_PROXY, 1), // сколько прокси (nginx) стоит перед сервером
 
   // --- временные ключи ---

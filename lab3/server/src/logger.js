@@ -6,6 +6,14 @@ const pino = require('pino');
 const pinoHttp = require('pino-http');
 const config = require('./config');
 
+// Куда писать: всегда в stdout (docker compose logs), а если задан LOG_FILE — ещё и в файл (по строке JSON на событие).
+const streams = [{ stream: process.stdout }];
+if (config.logFile) {
+  const fileStream = pino.destination({ dest: config.logFile, mkdir: true, sync: false });
+  fileStream.on('error', (err) => console.error(`Не удалось писать лог в файл ${config.logFile}: ${err.message}`));
+  streams.push({ stream: fileStream });
+}
+
 const logger = pino({
   level: config.logLevel,
   base: { service: 'spp-lab3-api' },
@@ -25,7 +33,7 @@ const logger = pino({
     ],
     censor: '[REDACTED]',
   },
-});
+}, pino.multistream(streams));
 
 // Лог каждого HTTP-запроса: метод, путь, статус, время, id запроса, пользователь.
 const httpLogger = pinoHttp({
@@ -42,9 +50,10 @@ const httpLogger = pinoHttp({
     if (res.statusCode >= 400) return 'warn';
     return 'info';
   },
-  customSuccessMessage: (req, res) => `${req.method} ${req.url.split('?')[0]} -> ${res.statusCode}`,
-  customErrorMessage: (req, res) => `${req.method} ${req.url.split('?')[0]} -> ${res.statusCode} (error)`,
-  customProps: (req) => ({ userId: req.user?.id ?? null, role: req.user?.role ?? null }),
+  customSuccessMessage: (req, res) => `${req.method} ${(req.originalUrl || req.url).split('?')[0]} -> ${res.statusCode}`,
+  customErrorMessage: (req, res) => `${req.method} ${(req.originalUrl || req.url).split('?')[0]} -> ${res.statusCode} (error)`,
+  // userId и role добавляем только когда пользователь известен: иначе ключи дублировались бы (null + реальное значение).
+  customProps: (req) => (req.user ? { userId: req.user.id, role: req.user.role } : {}),
   serializers: {
     req: (req) => ({ id: req.id, method: req.method, url: req.url, ip: req.remoteAddress }),
     res: (res) => ({ statusCode: res.statusCode }),
